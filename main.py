@@ -96,7 +96,7 @@ def check_hash_approved(cpu_hash, mac_hash):
     return False
 
 def main_check():
-    print("🔍 Kiểm tra hash CPU và MAC, gửi thông tin thiết bị qua Discord...")
+    print("🔍 Kiểm tra bản quyền của bạn...")
 
     cpu_id = get_cpu_id()
     mac = get_mac_address()
@@ -114,7 +114,7 @@ def main_check():
         while True:
             time.sleep(60)  # giữ chương trình chạy chờ người dùng thoát
     else:
-        print("✅ Bạn đã được duyệt sử dụng tool. Tiếp tục chạy chức năng...")
+        print("✅ Bản Quyền Của Bạn Hợp Lệ. Tiếp tục chạy chức năng...")
 
 if __name__ == "__main__":
     # Chặn thông báo khi import pygame (giảm thông báo khi init mixer)
@@ -127,4 +127,4 @@ if __name__ == "__main__":
     main_check()
 
     # Sau khi check ok, import và chạy phần tool câu cá của bạn (test6.py)
-    import test6  # chắc chắn có file test6.py trong cùng thư mục
+    import test8  # chắc chắn có file test6.py trong cùng thư mục

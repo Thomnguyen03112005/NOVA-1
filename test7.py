@@ -5,24 +5,18 @@ import time
 import random
 from pynput.keyboard import Controller as KeyboardController, Key
 from pynput.mouse import Controller as MouseController, Button
-import pygame
 import mss
 import contextlib
 import sys
+import pygame
 
+# Tắt thông báo pygame khi import
 with open(os.devnull, 'w') as devnull:
     with contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull):
-        import pygame
         pygame.mixer.init()
-
 
 keyboard = KeyboardController()
 mouse = MouseController()
-
-with open(os.devnull, 'w') as devnull:
-    with contextlib.redirect_stdout(devnull), contextlib.redirect_stderr(devnull):
-        import pygame
-        pygame.mixer.init()
 
 def play_sound_blocking(path):
     try:
@@ -47,9 +41,9 @@ def load_template(name, binary=False):
         _, img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
     return img
 
-# Load template ảnh
-template5 = load_template("5.png", binary=True)
-template7 = load_template("7.png", binary=True)
+# Load template ảnh (5 và 7 KHÔNG dùng binary)
+template5 = load_template("5.png")
+template7 = load_template("7.png")
 template1 = load_template("1.png")
 template2 = load_template("2.png")
 template3 = load_template("3.png")
@@ -61,7 +55,7 @@ threshold = 0.85
 
 def get_screen_gray(binary=False):
     with mss.mss() as sct:
-        monitor = sct.monitors[2]  # Thay đổi nếu không đúng màn hình
+        monitor = sct.monitors[2]  # Sửa nếu sai màn hình
         img = np.array(sct.grab(monitor))
         gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
         if binary:
@@ -75,7 +69,7 @@ def check_template(template, binary=False):
     return len(loc[0]) > 0
 
 def wait_for_image(template, timeout_seconds, binary=False):
-    start = time.time()     
+    start = time.time()
     while time.time() - start < timeout_seconds:
         if check_template(template, binary=binary):
             return True
@@ -93,25 +87,25 @@ def hold_click(duration):
     mouse.release(Button.left)
 
 def repeat_hold_click_until_template_gone(template_check, binary=False):
-    print("✊ Bắt đầu giữ chuột trái (lặp) cho đến khi ảnh 8 biến mất...")
+    print("✊ Giữ chuột đến khi ảnh 8 biến mất...")
     start = time.time()
     while check_template(template_check, binary=binary):
-        hold_time = random.uniform(0.55, 1.0)
+        hold_time = random.uniform(0.5, 0.7)
         release_time = random.uniform(0.4, 0.6)
-        print(f"➡️  Giữ chuột {hold_time:.2f}s, nghỉ {release_time:.2f}s...")
+        print(f"➡️ Giữ {hold_time:.2f}s, nghỉ {release_time:.2f}s")
         hold_click(hold_time)
         time.sleep(release_time)
         if time.time() - start > 60:
-            print("⏰ Quá 60s vẫn còn ảnh 8. Thoát lặp.")
+            print("⏰ Quá 60s ảnh 8 vẫn còn. Thoát.")
             break
     print("✅ Ảnh 8 đã biến mất.")
 
 def press_tab_until_5_or_7_detected(max_tries=20, first_run=False):
     if first_run:
-        print("⏳ Đợi 10s để vào game...")
+        print("⏳ Đợi 10s vào game...")
         time.sleep(10)
 
-    print("⏳ Bắt đầu nhấn Tab liên tục để hiện ảnh 5 hoặc 7...")
+    print("⏳ Nhấn Tab để tìm ảnh 5 hoặc 7...")
     tries = 0
     while tries < max_tries:
         keyboard.press(Key.tab)
@@ -120,20 +114,20 @@ def press_tab_until_5_or_7_detected(max_tries=20, first_run=False):
         time.sleep(0.45)
         tries += 1
 
-        if check_template(template5, binary=True) or check_template(template7, binary=True):
-            print("✅ Đã phát hiện ảnh 5 hoặc 7.")
+        if check_template(template5) or check_template(template7):
+            print("✅ Tìm thấy ảnh 5 hoặc 7.")
             play_sound_blocking(SOUND_PATH)
             return True
 
-    print("❌ Không tìm thấy ảnh 5 hoặc 7 sau 20 lần nhấn Tab.")
+    print("❌ Không tìm thấy ảnh 5 hoặc 7 sau 20 lần.")
     play_sound_blocking(SOUND_PATH)
     return False
 
 def restart_loop():
     print("✅ Ảnh 8 đã biến mất.")
-    print("⏳ Đợi 5s sau khi mất ảnh 8...")
+    print("⏳ Đợi 5s trước khi lặp...")
     time.sleep(5)
-    print("🔁 Bắt đầu vòng lặp mới...")
+    print("🔁 Lặp lại vòng mới...")
 
 print("🚀 Bắt đầu bot câu cá... Nhấn Ctrl+C để thoát.")
 
@@ -141,13 +135,13 @@ try:
     first_run = True
     while True:
         if not press_tab_until_5_or_7_detected(first_run=first_run):
-            print("❌ Không thể mở kho đồ, thoát bot.")
+            print("❌ Không mở được kho đồ. Thoát.")
             break
         first_run = False
 
         while True:
-            if check_template(template5, binary=True) or check_template(template7, binary=True):
-                print("🎯 Phát hiện ảnh 5 hoặc 7. Nhấn phím 2.")
+            if check_template(template5) or check_template(template7):
+                print("🎯 Phát hiện ảnh 5 hoặc 7 → nhấn phím 2.")
                 keyboard.press('2')
                 time.sleep(0.05)
                 keyboard.release('2')
@@ -168,7 +162,7 @@ try:
                     continue
 
                 hold_time_1 = random.uniform(0.8, 1.2)
-                print(f"🖱️ Ảnh 1 xuất hiện → giữ chuột trái {hold_time_1:.2f}s.")
+                print(f"🖱️ Ảnh 1 xuất hiện → giữ chuột {hold_time_1:.2f}s.")
                 hold_click(hold_time_1)
                 time.sleep(1)
 
@@ -179,7 +173,7 @@ try:
                         break
                     continue
 
-                print("🖱️ Ảnh 2 xuất hiện → Click chuột trái.")
+                print("🖱️ Ảnh 2 xuất hiện → click chuột.")
                 click()
                 time.sleep(1)
 
@@ -194,7 +188,7 @@ try:
                 if not press_tab_until_5_or_7_detected():
                     break
             else:
-                print("🔍 Đang tìm ảnh 5 hoặc 7...")
+                print("🔍 Tìm ảnh 5 hoặc 7...")
                 time.sleep(1)
 
 except KeyboardInterrupt:

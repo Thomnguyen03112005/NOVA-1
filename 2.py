@@ -15,7 +15,7 @@ def click_and_crop(event, x, y, flags, param):
         cv2.rectangle(image, ref_point[0], ref_point[1], (0, 255, 0), 2)
         cv2.imshow("Image", image)
 
-image_path = "f:/nova/image/avc.png"
+image_path = "f:/nova/image/khodo.png"
 
 if not os.path.exists(image_path):
     print("❌ File KHÔNG tồn tại!")
